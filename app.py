@@ -1,46 +1,53 @@
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
-# إعدادات الصفحة
-st.set_page_config(page_title="MAO English Pilot (Copilot Mode)", page_icon="🤖", layout="wide")
+# إعدادات الصفحة لـ MAO
+st.set_page_config(page_title="MAO English Pilot", page_icon="🚀", layout="wide")
 
 # القائمة الجانبية
 with st.sidebar:
     st.title("⚙️ الإعدادات")
-    # هنا هتحتاج OpenAI API Key بدل Gemini
-    api_key = st.text_input("OpenAI API Key:", type="password")
-    st.info("تم التحديث للعمل بمحرك GPT-4 (Copilot Engine).")
+    api_key = st.text_input("Gemini API Key:", type="password")
+    st.info("الأبلكيشن ده متفصل لـ محمود أشرف (MAO) لتطوير الإنجليزية في مجال الـ Data Analysis.")
+
+# وظيفة طلب الرد من Gemini
+def get_response(api_key, prompt):
+    try:
+        genai.configure(api_key=api_key)
+        # استخدام موديل 1.5 flash لأنه الأسرع والأحدث حالياً
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"⚠️ عذراً يا محمود، حصل خطأ: {str(e)}"
 
 if api_key:
-    try:
-        # تعريف العميل (Client)
-        client = OpenAI(api_key=api_key)
-        
-        st.title("🤖 MAO Copilot Pilot")
-        
-        tab1, tab2 = st.tabs(["🎯 القاموس المهني", "📝 مصحح اليوميات"])
+    st.title("🚀 MAO English Pilot")
+    
+    tabs = st.tabs(["🎯 القاموس المهني", "📝 مصحح اليوميات", "💬 محاكاة المقابلة"])
 
-        with tab1:
-            word = st.text_input("ادخل المصطلح التقني:")
-            if word:
-                with st.spinner('جاري التحليل...'):
-                    # هنا بنادي موديل gpt-4o وهو الأحدث
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[{"role": "user", "content": f"Explain '{word}' for a Data Analyst."}]
-                    )
-                    st.markdown(response.choices[0].message.content)
+    # 1. القاموس المهني
+    with tabs[0]:
+        word = st.text_input("ادخل مصطلح تقني (مثلاً: Version Control):")
+        if word:
+            with st.spinner('جاري التحليل...'):
+                prompt = f"Explain '{word}' simply for a Data Analyst. Provide 2 professional examples."
+                st.markdown(get_response(api_key, prompt))
 
-        with tab2:
-            user_text = st.text_area("اكتب نصك هنا:")
-            if st.button("تصحيح"):
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[{"role": "user", "content": f"Correct this English: {user_text}"}]
-                )
-                st.success(response.choices[0].message.content)
+    # 2. مصحح اليوميات
+    with tabs[1]:
+        text = st.text_area("اكتب روتينك أو اللي اتعلمته النهاردة بالإنجليزية:")
+        if st.button("تطوير النص"):
+            with st.spinner('جاري التصحيح...'):
+                prompt = f"Correct this English and make it sound professional for a Data Analyst: {text}"
+                st.success(get_response(api_key, prompt))
 
-    except Exception as e:
-        st.error(f"حصلت مشكلة: {e}")
+    # 3. محاكاة المقابلة
+    with tabs[2]:
+        st.write("تدرب على أسئلة الـ Interview!")
+        if st.button("ابدأ سؤال عشوائي"):
+            with st.spinner('جاري التحميل...'):
+                prompt = "Ask me one tough interview question for a Data Analyst role."
+                st.info(get_response(api_key, prompt))
 else:
-    st.warning("⚠️ دخل الـ OpenAI API Key عشان نفتح المحرك الجديد.")
+    st.warning("⚠️ من فضلك دخل الـ API Key في القائمة الجانبية.")
