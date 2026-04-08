@@ -13,12 +13,18 @@ with st.sidebar:
 # وظيفة لإرسال الطلبات للذكاء الاصطناعي مع معالجة الأخطاء
 def get_ai_response(prompt_text):
     try:
-        # استخدام التسمية الأكثر استقراراً حالياً
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # ده "الجوكر" اللي شغال عالمياً ومستقر جداً
+        model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(prompt_text)
         return response.text
     except Exception as e:
-        return f"⚠️ عذراً يا محمود، حصل خطأ: {str(e)}"
+        # لو فشل، بيجرب النسخة التانية كخطة بديلة (Backup)
+        try:
+            model = genai.GenerativeModel('models/gemini-pro')
+            response = model.generate_content(prompt_text)
+            return response.text
+        except:
+            return f"⚠️ عذراً يا محمود، حصل خطأ: {str(e)}"
 
 if api_key:
     try:
