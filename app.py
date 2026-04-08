@@ -26,6 +26,22 @@ if api_key:
     
     tabs = st.tabs(["🎯 القاموس المهني", "📝 مصحح اليوميات", "💬 محاكاة المقابلة"])
 
+    # ضيف الكود ده في الـ Sidebar تحت خانة الـ API Key
+with st.sidebar:
+    if st.button("🔍 استعراض الموديلات المتاحة"):
+        if api_key:
+            try:
+                genai.configure(api_key=api_key)
+                models = genai.list_models()
+                st.write("الموديلات المتاحة لـ MAO:")
+                for m in models:
+                    if 'generateContent' in m.supported_generation_methods:
+                        st.code(m.name) # هيطبع لك الاسم اللي المفروض نكتبه في الكود
+            except Exception as e:
+                st.error(f"فشل في جلب القائمة: {e}")
+        else:
+            st.warning("دخل الـ Key الأول يا برنس!")
+
     # 1. القاموس المهني
     with tabs[0]:
         word = st.text_input("ادخل مصطلح تقني (مثلاً: Version Control):")
