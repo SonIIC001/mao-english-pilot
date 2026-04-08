@@ -20,7 +20,7 @@ def get_ai_response(prompt_text):
     except Exception as e:
         # لو فشل، بيجرب النسخة التانية كخطة بديلة (Backup)
         try:
-            model = genai.GenerativeModel('models/gemini-pro')
+            model = genai.GenerativeModel(model_name='gemini-1.5-flash')
             response = model.generate_content(prompt_text)
             return response.text
         except:
